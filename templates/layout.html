@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Personal Wiki</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  
+    <header>
+        <h1><a href="/">My Personal Wiki</a></h1>
+    </header>
+
+    <div class="auth-box">
+      {% if current_user %}
+        <span class="user-info">👤 {{ current_user }}</span>
+        <a href="{{ url_for('logout') }}" class="auth-link">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="auth-link">Login</a>
+        <a href="{{ url_for('register') }}" class="auth-link">Register</a>
+      {% endif %}
+    </div>
+
+    <main>
+        <a href="{{ url_for('create_entry') }}" class="new-entry-btn">+ New Entry</a>
+        {% block content %}{% endblock %}
+    </main>
+
+</body>
+</html>

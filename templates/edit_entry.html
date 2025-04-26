@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h2>Edit Entry</h2>
+
+<form method="POST">
+  <label>Title:</label><br>
+  <input type="text" name="title" value="{{ entry.title }}" required><br><br>
+
+  <label>Topic:</label><br>
+  <input type="text" name="topic" value="{{ entry.topic }}" required><br><br>
+
+  <label>Tags (comma separated):</label><br>
+  <input type="text" name="tags" value="{{ entry.tags | join(', ') }}"><br><br>
+
+  <label>Content:</label><br>
+  <textarea name="content" rows="8" cols="50" required>{{ entry.content }}</textarea><br><br>
+
+  <button type="submit">Update Entry</button>
+</form>
+
+{% endblock %}

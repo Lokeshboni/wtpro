@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h2>{{ entry.title }}</h2>
+<p><strong>Topic:</strong> {{ entry.topic }}</p>
+<p>{{ entry.content }}</p>
+
+<!-- Like Button -->
+{% if session.get("user_id") %}
+  <form id="likeForm" action="{{ url_for('like_entry', entry_id=entry._id) }}" method="POST">
+    <button type="button" id="likeButton" onclick="toggleLike()">
+      {% if session['user_id'] in entry.get('likes', []) %}
+        ❤️
+      {% else %}
+        🤍
+      {% endif %}
+    </button>
+    <span id="likeCount">{{ entry.likes | length if entry.likes else 0 }} like{{ '' if entry.likes|length == 1 else 's' }}</span>
+  </form>
+{% endif %}
+
+{% if entry.tags %}
+  <p><strong>Tags:</strong> {{ entry.tags | join(', ') }}</p>
+{% endif %}
+
+{% if entry.images %}
+  <h3>Images</h3>
+  <div class="entry-images">
+    {% for img in entry.images %}
+      <img src="{{ url_for('static', filename='uploads/' + img) }}" alt="Image" class="entry-img">
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if entry.videos %}
+  <h3>Videos</h3>
+  <div class="entry-videos">
+    {% for vid in entry.videos %}
+      <video src="{{ url_for('static', filename='uploads/' + vid) }}" controls class="entry-video"></video>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if session.get('user_id') == entry.user_id %}
+  <div class="entry-actions">
+    <a href="{{ url_for('edit_entry', entry_id=entry._id) }}" class="btn-edit">✏️ Edit</a>
+    <form action="{{ url_for('delete_entry', entry_id=entry._id) }}" method="POST" style="display:inline;">
+      <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this entry?');">🗑️ Delete</button>
+    </form>
+  </div>
+{% endif %}
+
+<hr>
+<h3>Comments</h3>
+
+{% if entry.comments %}
+  <ul class="comment-list">
+    {% for comment in entry.comments %}
+      <li>
+        <strong>{{ comment.username }}</strong>: {{ comment.comment }}
+        <em>({{ comment.timestamp }})</em>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No comments yet.</p>
+{% endif %}
+
+{% if session.get("username") %}
+  <form action="{{ url_for('add_comment', entry_id=entry._id) }}" method="POST">
+    <textarea name="comment" required placeholder="Write your comment..." rows="3" cols="50"></textarea><br>
+    <button type="submit">Add Comment</button>
+  </form>
+{% else %}
+  <p><a href="{{ url_for('login') }}">Login</a> to add a comment.</p>
+{% endif %}
+
+<script>
+function toggleLike() {
+  fetch("{{ url_for('like_entry', entry_id=entry._id) }}", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }
+  })
+  .then(res => res.json())
+  .then(data => {
+    const likeBtn = document.getElementById("likeButton");
+    const likeCount = document.getElementById("likeCount");
+    likeBtn.textContent = data.liked ? "❤️" : "🤍";
+    likeCount.textContent = `${data.total_likes} like${data.total_likes === 1 ? '' : 's'}`;
+  });
+}
+</script>
+
+{% endblock %}
