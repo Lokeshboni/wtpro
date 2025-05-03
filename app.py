@@ -12,12 +12,13 @@ load_dotenv()
 
 # Initialize app
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY")
+app.secret_key = os.getenv("SECRET_KEY", "your_default_secret_key")
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
 # Database
-client = MongoClient(os.getenv("MONGO_URI"))
-db = client.personal_wiki
+mongo_uri = os.getenv("MONGO_URI")
+client = MongoClient(mongo_uri)
+db = client.get_database("personal_wiki")  # Ensures it connects to the right database
 entries = db.entries
 users = db.users
 
@@ -110,7 +111,7 @@ def create_entry():
             'images': image_filenames,
             'videos': video_filenames,
             'comments': [],
-            'likes': [],  # initialize likes
+            'likes': [],
             'user_id': session["user_id"],
             'username': session["username"]
         }
@@ -210,9 +211,6 @@ def inject_user():
     return dict(current_user=session.get("username"))
 
 # Run app
-import os
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
